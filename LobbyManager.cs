@@ -6,7 +6,7 @@ using UnityEngine.UI;
 // 마스터(매치 메이킹) 서버와 룸 접속을 담당
 public class LobbyManager : MonoBehaviourPunCallbacks {
     private string gameVersion = "1"; // 게임 버전
-
+  
     public Text connectionInfoText; // 네트워크 정보를 표시할 텍스트
     public Button joinButton; // 룸 접속 버튼
 
