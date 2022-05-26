@@ -1,24 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Photon.Pun;
-using Photon.Realtime;
-
-public class NetworkManager : MonoBehaviourPunCallbacks
-{
-    void Awake()
-    {
-        Screen.SetResolution(960, 540, false);
-        PhotonNetwork.ConnectUsingSettings();
-    }
-
-    public override void OnConnectedToMaster() => PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions { MaxPlayers = 6 }, null);
-    
-    public override void OnJoinedRoom() { }
-}
-
-/*
-
+// using System.Collections;
+// using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
@@ -26,44 +7,47 @@ using UnityEngine.UI;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {
-  public Text StatusText;
-  public InputField NickNameInput;
-  public GameObject Cube;
-  public string gameVersion = "1.0";
+    public InputField NickNameInput;
+    public GameObject DisconnectPanel;
+    public GameObject RespawnPanel;
 
+    void Awake()
+    {
+        Screen.SetResolution(1200, 700, false);
+        PhotonNetwork.SendRate = 60;
+        PhotonNetwork.SerializationRate = 30;
+    }
+    public void Connect() => PhotonNetwork.ConnectUsingSettings();
 
-  void Awake()
-  {
-      PhotonNetwork.AutomaticallySyncScene = true;
-  }
+    public override void OnConnectedToMaster()
+    {
+        PhotonNetwork.LocalPlayer.NickName = NickNameInput.text;
+        PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions { MaxPlayers = 6 }, null);
+    }
 
-  void Start()
-  {
-      PhotonNetwork.GameVersion = this.gameVersion;
-      PhotonNetwork.ConnectUsingSettings();
-  }
+    public override void OnJoinedRoom()
+    {
+        DisconnectPanel.SetActive(false);
+        Spawn();
+    }
 
-  void Connect() => PhotonNetwork.ConnectUsingSettings();
+    void Update() {
+        if(Input.GetKeyDown(KeyCode.Escape) && PhotonNetwork.IsConnected) {
+            PhotonNetwork.Disconnect();
+        }
+    }
 
-  override void OnConnectedToMaster()
-  {
-      PhotonNetwork.JoinRandomRoom();
-  }
+    public void Spawn()
+    {
+        // PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity);
+        // PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-6f, 19f), 4, 0), Quaternion.identity);
+        PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-60f, 190f), Random.Range(-10f, 30f), 0), Quaternion.identity);
+        RespawnPanel.SetActive(false);
+    }
 
-  override void OnJoinedRoom()
-  {
-      PhotonNetwork.Instantiate("Player3", Cube.transform.position, Quaternion.identity);
-  }
-
-  override void OnJoinRandomFailed(short returnCode, string message)
-  {
-      this.CreateRoom();
-  }
-
-  void CreateRoom()
-  {
-      PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = 4 });
-  }
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        DisconnectPanel.SetActive(true);
+        RespawnPanel.SetActive(false);    
+    }
 }
-
-*/
