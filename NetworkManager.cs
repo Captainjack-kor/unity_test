@@ -27,8 +27,9 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity);
         DisconnectPanel.SetActive(false);
-        Spawn();
+        // Spawn();
     }
 
     void Update() {
@@ -41,7 +42,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         // PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity);
         // PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-6f, 19f), 4, 0), Quaternion.identity);
-        PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-60f, 190f), Random.Range(-10f, 30f), 0), Quaternion.identity);
+        // PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-60f, 190f), Random.Range(-10f, 30f), 0), Quaternion.identity);
         RespawnPanel.SetActive(false);
     }
 
