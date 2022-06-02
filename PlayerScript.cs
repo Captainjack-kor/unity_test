@@ -97,6 +97,38 @@ public class PlayerScript : MonoBehaviourPunCallbacks
     //     canMove = true;
     // }
 
+
+    IEnumerator MoveCoroutine() {
+        h = Input.GetAxisRaw("Horizontal");
+        v = Input.GetAxisRaw("Vertical");
+
+        bool hDown = Input.GetButtonDown("Horizontal");
+        bool vDown = Input.GetButtonDown("Vertical");
+        bool hUp = Input.GetButtonUp("Horizontal");
+        bool vUp = Input.GetButtonUp("Vertical");
+
+        //Check Horizontal Move
+        if(hDown) {
+            isHorizonMove = true;
+        } else if (vDown) {
+            isHorizonMove = false;
+        } else if (hUp || vUp) {
+            isHorizonMove = h != 0;
+        } 
+
+        //Animation
+        if(anim.GetInteger("hAxisRaw") != h) {
+            anim.SetBool("isChange", true);
+            anim.SetInteger("hAxisRaw", (int)h);
+        } else if(anim.GetInteger("vAxisRaw") != v) {
+            anim.SetBool("isChange", true);
+            anim.SetInteger("vAxisRaw", (int)v);
+        } else {
+            anim.SetBool("isChange", false);
+        }
+
+        yield return new WaitForSeconds(0.01f);
+    }
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
@@ -111,35 +143,7 @@ public class PlayerScript : MonoBehaviourPunCallbacks
 
         if(PV.IsMine)
         {
-            //Move Value
-            h = Input.GetAxisRaw("Horizontal");
-            v = Input.GetAxisRaw("Vertical");
-
-            bool hDown = Input.GetButtonDown("Horizontal");
-            bool vDown = Input.GetButtonDown("Vertical");
-            bool hUp = Input.GetButtonUp("Horizontal");
-            bool vUp = Input.GetButtonUp("Vertical");
-
-            //Check Horizontal Move
-            if(hDown) {
-                isHorizonMove = true;
-            } else if (vDown) {
-                isHorizonMove = false;
-            } else if (hUp || vUp) {
-                isHorizonMove = h != 0;
-            } 
-
-            //Animation
-            if(anim.GetInteger("hAxisRaw") != h) {
-                anim.SetBool("isChange", true);
-                anim.SetInteger("hAxisRaw", (int)h);
-            } else if(anim.GetInteger("vAxisRaw") != v) {
-                anim.SetBool("isChange", true);
-                anim.SetInteger("vAxisRaw", (int)v);
-            } else {
-                anim.SetBool("isChange", false);
-            }
-
+            StartCoroutine(MoveCoroutine());
 
 
 
@@ -184,8 +188,8 @@ public class PlayerScript : MonoBehaviourPunCallbacks
         //Move
         Vector2 moveVec = isHorizonMove ? new Vector2(h, 0) : new Vector2(0, v);
 
-        // transform.Translate(h, v, 0);
-        rigid.velocity = moveVec * Speed;
+        transform.Translate(h, v, 0);
+        // rigid.velocity = moveVec * Speed;
     }
 
     // [PunRPC]
