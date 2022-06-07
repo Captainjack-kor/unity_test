@@ -188,8 +188,8 @@ public class PlayerScript : MonoBehaviourPunCallbacks
         //Move
         Vector2 moveVec = isHorizonMove ? new Vector2(h, 0) : new Vector2(0, v);
 
-        transform.Translate(h, v, 0);
-        // rigid.velocity = moveVec * Speed;
+        // transform.Translate(h, v, 0);
+        rigid.velocity = moveVec * Speed;
     }
 
     // [PunRPC]
