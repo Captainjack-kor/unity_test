@@ -10,19 +10,16 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public InputField NickNameInput;
     public GameObject DisconnectPanel;
     public GameObject RespawnPanel;
-
+		public static NetworkManager instance;
 		public GameObject init_Player;
+		public GameObject player;
 		float init_Player_x;
 		float init_Player_y;
-
-		public GameObject target; // 카메라가 따라갈 대상.
-    public float moveSpeed; // 카메라가 따라갈 속도
-    private Vector3 targetPosition; // 대상의 현재 위치 값
-
 
     void Awake()
     {
         // Screen.SetResolution(1200, 700, false, 60);
+				instance = this;
         Screen.SetResolution(1200, 700, false);
         // PhotonNetwork.SendRate = 60;
         // PhotonNetwork.SerializationRate = 30;
@@ -48,11 +45,11 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         }
 
 				// if(init_Player != null) {
-				// 	// Debug.Log(test.transform.position);
 				// 	init_Player_x = init_Player.transform.position.x;
 				// 	init_Player_y = init_Player.transform.position.y;
-				// 	targetPosition.Set(target.transform.position.x, target.transform.position.y, this.transform.position.z); //! this 생략가능 
-        //   this.transform.position = Vector3.Lerp(this.transform.position, targetPosition, moveSpeed * Time.deltaTime); // 1초에 moveSpeed만큼 이동
+					// Debug.Log(init_Player.transform.position);
+					// targetPosition.Set(target.transform.position.x, target.transform.position.y, this.transform.position.z); //! this 생략가능 
+          // this.transform.position = Vector3.Lerp(this.transform.position, targetPosition, moveSpeed * Time.deltaTime); // 1초에 moveSpeed만큼 이동
 				// }
 
 				// if(target.gameObject != null) {
@@ -64,7 +61,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public void Spawn()
     {
-        init_Player = PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity); // as GameObject;
+        GameObject _player = PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity); // as GameObject;
+				player = _player;
         // PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-6f, 19f), 4, 0), Quaternion.identity);
         // PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-60f, 190f), Random.Range(-10f, 30f), 0), Quaternion.identity);
         RespawnPanel.SetActive(false);
