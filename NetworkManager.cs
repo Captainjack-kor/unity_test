@@ -20,7 +20,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         // Screen.SetResolution(1200, 700, false, 60);
 				instance = this;
-        Screen.SetResolution(1200, 700, false);
+        Screen.SetResolution(960, 600, false);
         // PhotonNetwork.SendRate = 60;
         // PhotonNetwork.SerializationRate = 30;
     }
