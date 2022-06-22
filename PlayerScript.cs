@@ -53,6 +53,11 @@ public class PlayerScript : MonoBehaviourPunCallbacks
         // tr = GetComponent<Transform>();
     }
 
+    Void OnCollisionEnter(Collision o) {
+        canMove = !canMove;
+        Debug.Log(canMove);
+    }
+
     
     // IEnumerator MoveCoroutine() {
     //     while(Input.GetAxisRaw("Vertical") != 0 || Input.GetAxisRaw("Horizontal") != 0) {
@@ -143,8 +148,30 @@ public class PlayerScript : MonoBehaviourPunCallbacks
 
         if(PV.IsMine)
         {
+            Debug.Log(canMove);
             StartCoroutine(MoveCoroutine());
 
+            if(NetworkManager.instance.player != null) {
+                boxCollider.offset.x = NetworkManager.instance.player.transform.position.x; 
+                boxCollider.offset.y = NetworkManager.instance.player.transform.position.y;
+                // boxCollider.offset = new Vector2(NetworkManager.instance.player.transform.position.x, NetworkManager.instance.player.transform.position);   
+            }
+
+            // RaycastHit2D hit;
+            // A지점에서 B지점까지 레이저를 쏘는데 무사히 도착하면 
+            // hit = null
+
+            // 반대로 못 도달하면 (충돌)
+            // hit = 방해물(충돌된 것 리턴)
+            // Vector2 start = NetworkManager.instance.player.transform.position; // A지점 - 캐릭터 현재 위치 값
+            // Vector2 end = start + new Vector2(NetworkManager.instance.player.transform.position.x, NetworkManager.instance.player.transform.position.y); // B지점 - 캐릭터가 이동하고자 하는 위치 값
+
+            // boxCollider.enabled = false;
+            // hit = Physics2D.Linecast(start, end, layerMask);
+            // boxCollider.enabled = true;
+            // if(hit.transform != null) {
+            //     break;  
+            // }
 
 
 
@@ -186,10 +213,12 @@ public class PlayerScript : MonoBehaviourPunCallbacks
     void FixedUpdate() 
     {
         //Move
-        Vector2 moveVec = isHorizonMove ? new Vector2(h, 0) : new Vector2(0, v);
+        if(canMove) {
+            Vector2 moveVec = isHorizonMove ? new Vector2(h, 0) : new Vector2(0, v);
 
-        // transform.Translate(h, v, 0);
-        rigid.velocity = moveVec * Speed;
+            // transform.Translate(h, v, 0);
+            rigid.velocity = moveVec * Speed;
+        }
     }
 
     // [PunRPC]
