@@ -15,6 +15,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 		public GameObject player;
 		float init_Player_x;
 		float init_Player_y;
+    public Text nickname_Text;
 
     void Awake()
     {
@@ -29,6 +30,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         PhotonNetwork.LocalPlayer.NickName = NickNameInput.text;
+        // nickname_Text = 
         PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions { MaxPlayers = 6 }, null);
     }
 
