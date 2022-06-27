@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Captainjack-kor/unity_test/issues"
   },
-  "homepage": "https://github.com/Captainjack-kor/unity_test#readme"
+  "homepage": "https://github.com/Captainjack-kor/unity_test#readme",
+  "dependencies": {
+    "dotenv": "^16.0.1"
+  }
 }

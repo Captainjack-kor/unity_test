@@ -16,6 +16,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 		float init_Player_x;
 		float init_Player_y;
     public Text nickname_Text;
+    public GameObject ChatBoxPanel;
+    public GameObject ChatListPanel;
 
     void Awake()
     {
@@ -68,11 +70,15 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         // PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-6f, 19f), 4, 0), Quaternion.identity);
         // PhotonNetwork.Instantiate("Player", new Vector3(Random.Range(-60f, 190f), Random.Range(-10f, 30f), 0), Quaternion.identity);
         RespawnPanel.SetActive(false);
+        // ChatListPanel.SetActive(true);
+        // ChatBoxPanel.SetActive(true);
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         DisconnectPanel.SetActive(true);
+        // ChatListPanel.SetActive(false);
+        // ChatBoxPanel.SetActive(false);
         RespawnPanel.SetActive(false);    
     }
 }
