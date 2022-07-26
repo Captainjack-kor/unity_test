@@ -4,12 +4,17 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
+using WebSocketSharp;
+using TMPro;
+
 public class PlayerScript : MonoBehaviourPunCallbacks
 {
      //, IPunObservable
-
+    public VariableJoystick joy;
     Rigidbody2D rigid;
     Animator anim;
+    Vector3 dirVec;
+    Vector3 moveVec;
     public PhotonView PV;
     public Text NickNameText;
     public SpriteRenderer SpriteRenderer; 
@@ -17,8 +22,7 @@ public class PlayerScript : MonoBehaviourPunCallbacks
     private Vector3 vector;
     public LayerMask layerMask; // 어떤 레이어와 충돌했는지 판단 (통과가 불가능한 레이어를 설정해줌) 
     public float Speed;
-    float h;
-    float v;
+    GameObject scanObject;
     bool isHorizonMove;
     // public float runSpeed;
     private float applyRunSpeed;
@@ -29,79 +33,23 @@ public class PlayerScript : MonoBehaviourPunCallbacks
     private Animator animator;
 
     // public float speed = 10.0f;
-    // private Transform tr;
+    private Transform tr;
+    private WebSocket m_WebSocket;
+    private GameObject AIPanel;
+    public bool mailbox_popup = false;
+    public bool popup_result = false;
+    public Image msgCount;
+    private GameObject DisconnectPanel;
+    float h;
+    float v;
 
     void Start()
     {
-        // CameraWork _cameraWork = this.gameObject.GetComponent<CameraWork>();
-        // if (_cameraWork != null)
-        // {
-        //     if (photonView.IsMine)
-        //     {
-        //         _cameraWork.OnStartFollowing();
-        //     }
-        // }
-        // else
-        // {
-        //     Debug.LogError("<Color=Red><a>Missing</a></Color> CameraWork Component on playerPrefab.", this);
-        // }
-
-        // 컴포넌트 불러와서 저장
         boxCollider = GetComponent<BoxCollider2D>();
-        // anim = GetComponent<Animator>();
-        // animator = GetComponent<Animator>();
-        // tr = GetComponent<Transform>();
+        tr = GetComponent<Transform>();
+        AIPanel = GameObject.Find("AIPanel");
+        DisconnectPanel = GameObject.Find("DisconnectPanel");
     }
-
-    Void OnCollisionEnter(Collision o) {
-        canMove = !canMove;
-        Debug.Log(canMove);
-    }
-
-    
-    // IEnumerator MoveCoroutine() {
-    //     while(Input.GetAxisRaw("Vertical") != 0 || Input.GetAxisRaw("Horizontal") != 0) {
-    //         if(Input.GetKey(KeyCode.LeftShift)) {
-    //             applyRunSpeed = runSpeed;
-    //             applyRunFlag = true;
-    //         }
-    //         else {
-    //             applyRunSpeed = 0;
-    //             applyRunFlag = false;
-    //         }
-    //         vector.Set(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), transform.position.z);
-    //         if(vector.x != 0) 
-    //         {
-    //             vector.y = 0;
-    //         }
-    //         animator.SetFloat("DirX", vector.x);
-    //         animator.SetFloat("DirY", vector.y);
-
-
-    //         animator.SetBool("Walking", true);
-
-    //         while(currentWalkCount < walkCount) {
-    //             if(vector.x != 0) 
-    //             {
-    //                 transform.Translate(vector.x * (speed + applyRunSpeed), 0, 0);
-    //             }
-    //             else if(vector.y != 0) 
-    //             {
-    //                 transform.Translate(0, vector.y * (speed + applyRunSpeed), 0);
-    //             }
-    //             if(applyRunFlag) {
-    //                 currentWalkCount++;
-    //             }
-
-    //             currentWalkCount++;
-    //             yield return new WaitForSeconds(0.10f);
-    //         }
-    //         currentWalkCount = 0;
-    //     }
-    //     animator.SetBool("Walking", false);
-    //     canMove = true;
-    // }
-
 
     IEnumerator MoveCoroutine() {
         h = Input.GetAxisRaw("Horizontal");
@@ -134,92 +82,181 @@ public class PlayerScript : MonoBehaviourPunCallbacks
 
         yield return new WaitForSeconds(0.01f);
     }
+    
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-        NickNameText.text = PV.IsMine ? PhotonNetwork.NickName : PV.Owner.NickName;
-        NickNameText.color = PV.IsMine ? Color.green : Color.red;
-    }
+        if( PV != null ){
+            NickNameText.text = PV.IsMine ? PhotonNetwork.NickName : PV.Owner.NickName;
+            NickNameText.color = PV.IsMine ? Color.white : Color.red;
+        }
+    }  
     
-
     void Update()
     {
+      if( PV == null ){
+        return;
+      }
 
-        if(PV.IsMine)
-        {
-            Debug.Log(canMove);
-            StartCoroutine(MoveCoroutine());
+      if(PV.IsMine)
+      {
+        // StartCoroutine(MoveCoroutine());
+        // Debug.Log(canMove);
 
-            if(NetworkManager.instance.player != null) {
-                boxCollider.offset.x = NetworkManager.instance.player.transform.position.x; 
-                boxCollider.offset.y = NetworkManager.instance.player.transform.position.y;
-                // boxCollider.offset = new Vector2(NetworkManager.instance.player.transform.position.x, NetworkManager.instance.player.transform.position);   
-            }
+        // float x = joy.Horizontal;
+        // float z = joy.Vertical;
+        // moveVec = new Vector2(x, z) * Speed * Time.deltaTime;
 
-            // RaycastHit2D hit;
-            // A지점에서 B지점까지 레이저를 쏘는데 무사히 도착하면 
-            // hit = null
-
-            // 반대로 못 도달하면 (충돌)
-            // hit = 방해물(충돌된 것 리턴)
-            // Vector2 start = NetworkManager.instance.player.transform.position; // A지점 - 캐릭터 현재 위치 값
-            // Vector2 end = start + new Vector2(NetworkManager.instance.player.transform.position.x, NetworkManager.instance.player.transform.position.y); // B지점 - 캐릭터가 이동하고자 하는 위치 값
-
-            // boxCollider.enabled = false;
-            // hit = Physics2D.Linecast(start, end, layerMask);
-            // boxCollider.enabled = true;
-            // if(hit.transform != null) {
-            //     break;  
-            // }
-
-
-
-            //TODO: 밑에 보류
-            /*
-            vector.Set(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), transform.position.z);
-            if(vector.x != 0) 
-            {
-                vector.y = 0;
-            }
-            animator.SetFloat("DirX", vector.x);
-            animator.SetFloat("DirY", vector.y);
-            // animator.SetBool("Walking", true);
-            if(vector.x != 0) 
-            {
-                transform.Translate(vector.x, 0, 0);
-            }
-            else if(vector.y != 0) 
-            {
-                transform.Translate(0, vector.y, 0);
-            } 
-
-            if(canMove) {
-            if(Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0) 
-            {
-                canMove = false;
-                StartCoroutine(MoveCoroutine());
-            }  
-            */
-        }
-        // animator.SetBool("Walking", false);
-        // else {
+        // if(DisconnectPanel.transform.localScale.x == 0) {
 
         // }
-        // else if ((transform.position - curPos).sqrMagnitude >= 100) transform.position = curPos;
-        // else transform.position = Vector3.Lerp(transform.position, curPos, Time.deltaTime * 10);
+
+        if(joy.stillDown) {
+          h = joy.Horizontal;
+          v = joy.Vertical;
+          // if((h <= 0.7 && v >= 0.7) && (h >= -0.7 && v >= 0.7)) {
+          //   h = 0;
+          //   v = 1;
+          // } else if((h >= 0.7 && v <= 0.7) && (h >= 0.7 && v >= -0.7)) {
+          //   h = 1;
+          //   v = 0;
+          // } else if((h <= 0.7 && v <= -0.7) && (h >= -0.7 && v <= -0.7)) {
+          //   h = 0;
+          //   v = -1;
+          // } else if((h <= -0.7 && v >= -0.7) && (h <= -0.7 && v <= 0.7)) {
+          //   h = -1;
+          //   v = 0;
+          // }
+
+          if(h == 1 && v == 0) {
+            h = 1;
+            v = 0;
+          } else if(h == -1 && v == 0) {
+            h = -1;
+            v = 0;
+          } else if(v == 1 && h == 0) {
+            v = 1;
+            h = 0;
+          } else if(v == -1 && h == 0) {
+            v = -1;
+            h = 0;
+          }
+          // else if((h <= 0.7 && v >= 0.7) && (h >= -0.7 && v >= 0.7)) {
+          //   h = 0;
+          //   v = 1;
+          // } else if((h >= 0.7 && v <= 0.7) && (h >= 0.7 && v >= -0.7)) {
+          //   h = 1;
+          //   v = 0;
+          // } else if((h <= 0.7 && v <= -0.7) && (h >= -0.7 && v <= -0.7)) {
+          //   h = 0;
+          //   v = -1;
+          // } else if((h <= -0.7 && v >= -0.7) && (h <= -0.7 && v <= 0.7)) {
+          //   h = -1;
+          //   v = 0;
+          // }
+
+          // Debug.Log("h는: " + h);
+          // Debug.Log("v는: " + v);
+        } else {
+          h = Input.GetAxisRaw("Horizontal");
+          v = Input.GetAxisRaw("Vertical");
+        }
+
+        //Animation
+        // if (anim.GetInteger("hAxisRaw") != h)
+        // {
+        //   anim.SetBool("isChange", true);
+        //   anim.SetInteger("hAxisRaw", (int)h);
+        // }
+        // else if (anim.GetInteger("vAxisRaw") != v)
+        // {
+        //   anim.SetBool("isChange", true);
+        //   anim.SetInteger("vAxisRaw", (int)v);
+        // }
+        // else
+        // {
+        //   anim.SetBool("isChange", false);
+        // }
+
+        //Animation
+        if (anim.GetInteger("hAxisRaw") != h)
+        {
+          anim.SetBool("isChange", true);
+          anim.SetInteger("hAxisRaw", (int)h);
+        }
+        else if (anim.GetInteger("vAxisRaw") != v)
+        {
+          anim.SetBool("isChange", true);
+          anim.SetInteger("vAxisRaw", (int)v);
+        }
+        else
+        {
+          anim.SetBool("isChange", false);
+        }
+      }
     }
 
     void FixedUpdate() 
     {
         //Move
-        if(canMove) {
-            Vector2 moveVec = isHorizonMove ? new Vector2(h, 0) : new Vector2(0, v);
+        // rigid.velocity = Vector3.zero;
+        // Debug.DrawRay(NetworkManager.instance.player.transform.position, new Vector3(0, -1, 0) * 3f, new Color(0,1,0));
 
-            // transform.Translate(h, v, 0);
-            rigid.velocity = moveVec * Speed;
+        RaycastHit2D hit;
+        // A지점에서 B지점까지 레이저를 쏘는데 무사히 도착하면 
+        // hit = null
+
+
+        // vector.Set(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), transform.position.z);
+        // if(vector.x != 0) {
+        //     transform.Translate(vector.x, 0, 0);
+        // } else if(vector.y != 0) {
+        //     transform.Translate(0, vector.y, 0);
+        // }
+        // transform.Translate(h, v, 0);
+        // transform.rotation = Quaternion.Euler(0f, rotY, 0f);
+
+
+
+        // if(canMove) {
+        // if(AIPanel.transform.localScale.x == 0) {
+
+            // TODO 2022.07.19 Desigmer : 대각선 움직임 추가
+            if ((h != 0) && (v != 0))
+            {
+                transform.Translate(h * Mathf.Sqrt(h * h * h * h / 2) * Speed, v * Mathf.Sqrt(v * v * v * v / 2) * Speed, 0);
+            }
+            else if (h != 0 && v <= 0) {
+                transform.Translate(h * Speed, 0, 0);
+            } else if(v != 0 && h <= 0) {
+                transform.Translate(0, v * Speed, 0);
+            }
+
+            // transform.Translate(h * Speed, v * Speed, 0);
+
+
+                // Vector2 moveVec = isHorizonMove ? new Vector2(h, 0) : new Vector2(0, v);
+                // rigid.velocity = moveVec * Speed;
+        // }
+        // }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other) {
+        if( other.tag == "MailBox" ) {
+            // Debug.Log("in");
+            AIPanel.transform.localScale = new Vector3(1, 1, 1);
         }
     }
+
+    private void OnTriggerExit2D(Collider2D other) {
+        if( other.tag == "MailBox" ) {
+            // Debug.Log("out");
+            AIPanel.transform.localScale = new Vector3(0, 0, 0);
+        }
+    }
+
+
 
     // [PunRPC]
     // void moveTest(float axis) 
@@ -239,5 +276,3 @@ public class PlayerScript : MonoBehaviourPunCallbacks
     //     }
     // }
 }
-
-
