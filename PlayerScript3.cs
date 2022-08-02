@@ -10,6 +10,7 @@ using TMPro;
 public class PlayerScript : MonoBehaviourPunCallbacks
 {
      //, IPunObservable
+
     public VariableJoystick joy;
     Rigidbody2D rigid;
     Animator anim;
@@ -42,9 +43,9 @@ public class PlayerScript : MonoBehaviourPunCallbacks
     private GameObject DisconnectPanel;
     float h;
     float v;
-
     int dir_h;
     int dir_v;
+    public bool isState = false;
 
     void Start()
     {
@@ -196,17 +197,21 @@ public class PlayerScript : MonoBehaviourPunCallbacks
         
         if(PV != null) {
           // Debug.DrawRay(new Vector2(NetworkManager.instance.player.transform.position.x, NetworkManager.instance.player.transform.position.y - 17), Vector2.down * 10f, Color.red);
-          RaycastHit2D rayHit = Physics2D.Raycast(new Vector2(NetworkManager.instance.player.transform.position.x, NetworkManager.instance.player.transform.position.y - 17), Vector2.down, 10f, LayerMask.GetMask("object"));
-
+          // Debug.DrawRay(new Vector2(this.transform.position.x, this.transform.position.y - 17), Vector2.down * 10f, Color.red);
+          RaycastHit2D rayHit = Physics2D.Raycast(new Vector2(this.transform.position.x, this.transform.position.y - 17), Vector2.down, 10f, LayerMask.GetMask("object"));
+          
           if(rayHit.collider != null) {
             if(rayHit.collider.gameObject.tag == "Player")
             {
-              // Debug.Log(rayHit.collider.gameObject);
-              // Debug.Log(rayHit.collider.gameObject.GetComponent<BoxCollider2D>().bounds);
-              // Debug.Log(rayHit.collider.gameObject.GetComponent<SpriteRenderer>().sortingOrder);
-              this.GetComponent<SpriteRenderer>().sortingOrder = rayHit.collider.gameObject.GetComponent<SpriteRenderer>().sortingOrder - 1;
-            } 
-          } 
+              if(isState) {
+                this.GetComponent<SpriteRenderer>().sortingOrder = rayHit.collider.gameObject.GetComponent<SpriteRenderer>().sortingOrder - 1;
+              }
+              isState = false;
+            }
+          } else {
+            isState = true;
+            this.GetComponent<SpriteRenderer>().sortingOrder = 3;
+          }
         }
 
 
@@ -223,9 +228,9 @@ public class PlayerScript : MonoBehaviourPunCallbacks
         }
 
         if(PV != null) {
-          // if(joy.stillDown) {
-          //   transform.Translate(h * Speed, v * Speed, 0);
-          // } else if(!joy.stillDown) {
+          if(joy.stillDown) {
+            transform.Translate(h * Speed, v * Speed, 0);
+          } else if(!joy.stillDown) {
             // TODO 2022.07.19 Desigmer : 대각선 움직임 추가
             if ((h != 0) && (v != 0))
             {
@@ -236,7 +241,7 @@ public class PlayerScript : MonoBehaviourPunCallbacks
             } else if(v != 0 && h <= 0) {
                 transform.Translate(0, v * Speed, 0);
             }
-          // }
+          }
         }
     }
 
@@ -253,6 +258,10 @@ public class PlayerScript : MonoBehaviourPunCallbacks
             AIPanel.transform.localScale = new Vector3(0, 0, 0);
         }
     }
+
+    // private void OnCollisionExit2D(Collision2D col) {
+    //   this.GetComponent<SpriteRenderer>().sortingOrder = 3;
+    // }
 
 
 
